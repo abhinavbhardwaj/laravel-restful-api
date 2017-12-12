@@ -1,0 +1,23 @@
+php artisan clear
+php artisan config:clear
+composer dump-autoload
+
+
+-------------------------to create migration table-------------
+php artisan make:migration create_user_account_table --create=user_account 
+
+-------------------------To create model file -------------
+php artisan make:model folder/modelname
+eg.  php artisan make:model Models/Account 
+
+-------------------------To create Controller file -------------
+php artisan make:model folder/controllerName
+eg.  php artisan make:controller API/UserController 
+
+
+----------------------To run all migration files ---------------
+php artisan migrate
+
+
+-------------------------to install pasaport -----------
+php artisan passport:install
