@@ -1,3 +1,7 @@
+
+to change exception message go to 
+/var/www/html/api/app/Exceptions/Handler.php
+
 php artisan clear
 php artisan config:clear
 composer dump-autoload
@@ -12,7 +16,7 @@ eg.  php artisan make:model Models/Account
 
 -------------------------To create Controller file -------------
 php artisan make:model folder/controllerName
-eg.  php artisan make:controller API/UserController 
+eg.  php artisan make:controller API/TwitterController 
 
 
 ----------------------To run all migration files ---------------
@@ -21,3 +25,6 @@ php artisan migrate
 
 -------------------------to install pasaport -----------
 php artisan passport:install
+
+
+composer require thujohn/twitter

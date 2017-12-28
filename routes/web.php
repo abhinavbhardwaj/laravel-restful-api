@@ -14,3 +14,7 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('twitterUserTimeLine', 'API\TwitterController@twitterUserTimeLine');
+
+Route::post('tweet', ['as'=>'post.tweet','uses'=>'API\TwitterController@tweet']);
