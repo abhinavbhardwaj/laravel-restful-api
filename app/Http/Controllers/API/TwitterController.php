@@ -20,13 +20,16 @@ class TwitterController extends Controller {
         $screenName = $input['screen_name'];
         $fromDate = date('d-m-Y h:i:s a', strtotime($input['from_date']));
         $toDate = date('d-m-Y h:i:s a', strtotime($input['to_date']));
+        $searchText = trim($input['search_text']);
         $count = 200;
-        //we need all tweets from this particualr date range so lets start our loop 
-        $tweetsss = $this->_createTweetsData($screenName, $count, $fromDate, $toDate);
-        echo count($tweetsss);
-        print_r($tweetsss);
-        die;
-        return response()->json(['success' => $data], \Config::get('constants.status.success'));
+        //we need all tweets from this particualr date range so lets start our loop
+        $tweets = $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText);
+
+	$return['total_tweets'] = count($tweets['all']);
+	$return['total_matched_tweets'] = count($tweets['matchedSearch']);
+	$return['matched_tweets'] = $tweets['matchedSearch'];
+	$return['matched_tweets_data'] = count($tweetsss);
+        return response()->json(['success' => $return], \Config::get('constants.status.success'));
     }
 
     /**
@@ -36,36 +39,48 @@ class TwitterController extends Controller {
      * @param date $fromDate date from which we need tweets
      * @param date $toDate date till we need tweets
      */
-    private function _createTweetsData($screenName, $count = 200, $fromDate, $toDate, $prevTweets = array(), $max_id = 0) {
-            $Intweets  = isset($prevTweets) ? $prevTweets : array();
-        if (isset($max_id) && (int) $max_id > 0) {           
-            $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count, 'max_id' => $max_id]); 
-           
+    private function _createTweetsData($screenName, $count = 200, $fromDate, $toDate, $searchText=null, $prevTweets = array(), $max_id = 0) {
+
+        $tweets  = isset($prevTweets) ? $prevTweets : array();
+        $searchArray  =  array();
+        $matchedSearch  =  array();
+        if (isset($max_id) && (int) $max_id > 0) {
+            $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count, 'max_id' => $max_id]);
+
         } else {
             $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count]);
         }
-        
+	if(!empty($searchText)){
+	    $searchArray = explode(",", $searchText);
+	}
+
+
         foreach ($tweetData as $data) {
             $created_at = date('d-m-Y h:i:s a', strtotime($data->created_at));
             if (($created_at >= $fromDate) && ($created_at <= $toDate)) {
-                $Intweets[] = $data;
-                
+                $tweets['all'][] = $data;
+		//check for the search
+		if(count($searchArray) > 0){
+		    foreach($searchArray as $search){
+			if (strpos($data->text, $search) !== FALSE) {
+			    $tweets['matchedSearch'][] = $data;
+			}
+		    }
+		}
+
             }
             else{
-                $Outtweets[] = $data;
+                $tweets['Outtweets'][] = $data;
             }
-        } 
-        $lastCreatedAt = date('d-m-Y h:i:s a', strtotime((last($Outtweets)->created_at)));
-        $lastId = (last($Outtweets)->id);
-        if(($lastCreatedAt >= $toDate) && (int) $lastId > 0 ){ 
-            $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $Intweets, $lastId);
-        }else{
-            return $Intweets ;
-//            print_r(count($Intweets));
-//            die("aaa");
-//            return $Intweets;
         }
-          
+        $lastCreatedAt = date('d-m-Y h:i:s a', strtotime((last($tweets['Outtweets'])->created_at)));
+        $lastId = (last($tweets['Outtweets'])->id);
+        if(($lastCreatedAt >= $toDate) && (int) $lastId > 0 ){
+            $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $tweets['all'], $lastId);
+        }else{
+            return $tweets ;
+        }
+
     }
 
     /**
@@ -94,7 +109,7 @@ class TwitterController extends Controller {
     }
 
     /**
-     * Destroys the status specified by the required ID parameter. 
+     * Destroys the status specified by the required ID parameter.
      * The authenticating user must be the author of the specified status. Returns the destroyed status if successful.
      *
      * Parameters :
@@ -104,14 +119,14 @@ class TwitterController extends Controller {
     public function deleteTweet(Request $request) {
 
 //        $validator = Validator::make($request->all(), [
-//            'id' => 'required',  
+//            'id' => 'required',
 //        ]);
 //
 //        if ($validator->fails()) {
 //
-//            return response()->json(['error'=>$validator->errors()], \Config::get('constants.status.unauthorized'));            
+//            return response()->json(['error'=>$validator->errors()], \Config::get('constants.status.unauthorized'));
 //
-//        } 
+//        }
 
         $input = $request->all();
         $postIds = $input['post_id'];
@@ -121,7 +136,7 @@ class TwitterController extends Controller {
             $response[] = Twitter::destroyTweet(trim($id), $parameters);
         }
 
-//        $parameters = array('trim_user' => $input['trim_user']);        
+//        $parameters = array('trim_user' => $input['trim_user']);
 
         return response()->json(['success' => $response], \Config::get('constants.status.success'));
     }
