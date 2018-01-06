@@ -9,7 +9,7 @@ use File;
 use Validator;
 
 class TwitterController extends Controller {
-
+    public $allTweets = null; 
     /**
      * Create a new controller instance.
      *
@@ -18,19 +18,25 @@ class TwitterController extends Controller {
     public function twitterUserTimeLine(Request $request) {
         $input = $request->all();
         $screenName = $input['screen_name'];
-        $fromDate = date('d-m-Y h:i:s a', strtotime($input['from_date']));
-        $toDate = date('d-m-Y h:i:s a', strtotime($input['to_date']));
-        $searchText = trim($input['search_text']);
+        $fromDate =  strtotime($input['from_date']);
+        $toDate = strtotime($input['to_date']);
+        $searchText = trim($input['search_query']);
         $count = 200;
         //we need all tweets from this particualr date range so lets start our loop
-        $tweets = $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText);
+        $tweetsData[] = $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText); 
+        if(isset($this->allTweets)){
+            $return['totalTweet'] = (isset($this->allTweets['all'])) ? count($this->allTweets['all']) : 0;
+            $return['matchedTweet'] = (isset($this->allTweets['matchedSearch'])) ? count($this->allTweets['matchedSearch']) : 0;
+            $return['matchedTweetsData'] = (isset($this->allTweets['matchedSearch'])) ? $this->allTweets['matchedSearch'] : 0; 
+            //$return['totalTweetData'] = (isset($this->allTweets['all'])) ? $this->allTweets['all'] : 0;
 
-	$return['total_tweets'] = count($tweets['all']);
-	$return['total_matched_tweets'] = count($tweets['matchedSearch']);
-	$return['matched_tweets'] = $tweets['matchedSearch'];
-	$return['matched_tweets_data'] = count($tweetsss);
-        return response()->json(['success' => $return], \Config::get('constants.status.success'));
-    }
+            $return['from_date'] = date('d-m-Y', $fromDate);
+            $return['to_date'] = date('d-m-Y',$toDate);
+            $return['search_query'] = $searchText;
+
+            return response()->json(['success' => $return], \Config::get('constants.status.success')); 
+        } 
+        }
 
     /**
      * function to get and create tweets data
@@ -39,48 +45,52 @@ class TwitterController extends Controller {
      * @param date $fromDate date from which we need tweets
      * @param date $toDate date till we need tweets
      */
-    private function _createTweetsData($screenName, $count = 200, $fromDate, $toDate, $searchText=null, $prevTweets = array(), $max_id = 0) {
-
-        $tweets  = isset($prevTweets) ? $prevTweets : array();
-        $searchArray  =  array();
-        $matchedSearch  =  array();
+    public function _createTweetsData($screenName, $count = 200, $fromDate, $toDate, $searchText = null, $prevTweets = array(),$prevMatchedSearch=array(), $max_id = 0) {
+        
+        $tweets['all'] = isset($prevTweets) ? $prevTweets : array();
+        $searchArray = array();
+        $finalData = null; 
+        
+        $tweets['matchedSearch'] = isset($prevMatchedSearch) ? $prevMatchedSearch : array();
+        
         if (isset($max_id) && (int) $max_id > 0) {
             $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count, 'max_id' => $max_id]);
-
         } else {
             $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count]);
         }
-	if(!empty($searchText)){
-	    $searchArray = explode(",", $searchText);
-	}
-
-
+        if (!empty($searchText)) {
+            $searchArray = explode(",", $searchText);
+        }
         foreach ($tweetData as $data) {
-            $created_at = date('d-m-Y h:i:s a', strtotime($data->created_at));
+            $created_at =  strtotime($data->created_at);
             if (($created_at >= $fromDate) && ($created_at <= $toDate)) {
                 $tweets['all'][] = $data;
-		//check for the search
-		if(count($searchArray) > 0){
-		    foreach($searchArray as $search){
-			if (strpos($data->text, $search) !== FALSE) {
-			    $tweets['matchedSearch'][] = $data;
-			}
-		    }
-		}
-
+                //check for the search
+                if (count($searchArray) > 0) {
+                    foreach ($searchArray as $search) {
+                        if (strpos(strtolower($data->text), trim(strtolower($search))) !== FALSE) { 
+                            $tweets['matchedSearch'][] = $data;
+                        }
+                    }
+                }
+            } else { 
+                $tweets['outTweets'][] = $data;
             }
-            else{
-                $tweets['Outtweets'][] = $data;
-            }
+        } 
+        
+        if(isset($tweets['outTweets']) && count($tweets['outTweets']) > 0 ){
+            $lastCreatedAt =  strtotime((last($tweets['outTweets'])->created_at));
+            $lastId = (last($tweets['outTweets'])->id);
         }
-        $lastCreatedAt = date('d-m-Y h:i:s a', strtotime((last($tweets['Outtweets'])->created_at)));
-        $lastId = (last($tweets['Outtweets'])->id);
-        if(($lastCreatedAt >= $toDate) && (int) $lastId > 0 ){
-            $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $tweets['all'], $lastId);
-        }else{
-            return $tweets ;
+        else{
+            $lastCreatedAt = null;
+            $lastId = 0; 
         }
-
+        if (($lastCreatedAt >= $toDate) && (int) $lastId > 0) {  
+                $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText, $tweets['all'],$tweets['matchedSearch'], $lastId); 
+        }else{  
+            $this->allTweets = $tweets;
+        } 
     }
 
     /**
@@ -109,7 +119,7 @@ class TwitterController extends Controller {
     }
 
     /**
-     * Destroys the status specified by the required ID parameter.
+     * Destroys the status specified by the required ID parameter. 
      * The authenticating user must be the author of the specified status. Returns the destroyed status if successful.
      *
      * Parameters :
