@@ -28,3 +28,5 @@ php artisan passport:install
 
 
 composer require thujohn/twitter
+
+composer require sammyk/laravel-facebook-sdk
