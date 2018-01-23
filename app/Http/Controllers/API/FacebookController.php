@@ -95,4 +95,38 @@ class FacebookController extends Controller {
         header('location:WYF://oauth-callback/facebook'.$param);die;
 
     }
+    
+     /**
+     * API to create a callback for the call from client
+     * @param Request $request
+     */
+    public function addPost(Request $request) {
+         
+         $input = $request->all();
+         $accessToken = $request->header('authToken');
+         
+         if(!empty($input['message'])){
+            $post['message'] = $input['message'];
+         }
+         if(!empty($input['title'])){
+            $post['name'] = $input['title'];
+         }
+         if(!empty($input['link'])){
+            $post['link'] = $input['link'];
+         }
+         if(!empty($input['description'])){
+            $post['description'] = $input['description'];
+         }
+         if(!empty($input['picture'])){
+            $post['picture'] = $input['picture'];
+         }
+          
+        try {
+            $response = Facebook::post('/me/feed', $post , $accessToken); //current user all post
+            return response()->json(['success' => 'The post was submitted successfully to Facebook timeline.'], \Config::get('constants.status.success'));
+        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+            return response()->json(['error' => 'some error occur'], \Config::get('constants.status.unauthorized'));
+        }
+    }
+    
 }

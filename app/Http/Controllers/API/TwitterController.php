@@ -180,5 +180,17 @@ class TwitterController extends Controller {
 
         return back();
     }
+    
+     /**
+     * Create a new tweet on a tweeter account.
+     *
+     * @return void
+     */
+    public function addTweet(Request $request) { 
+        $input = $request->all();
+        $tweet = $input['tweet']; 
+        $twitterResponse = Twitter::postTweet(array('status' => "$tweet", 'format' => 'json')); 
+        return response()->json(['success' => $twitterResponse], \Config::get('constants.status.success'));
+    }
 
 }

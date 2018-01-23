@@ -23,12 +23,14 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get-user-account', 'API\AccountController@index');
 	
  /** twitter specific routes **/
-Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
+    Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
     Route::post('get-twetter-feed', ['uses'=>'API\TwitterController@searchTweets','middleware' => 'twitter-wrapper']);
     Route::post('delete-tweet', ['uses'=>'API\TwitterController@deleteTweet','middleware' => 'twitter-wrapper']);
+    Route::post('add-tweet', ['uses'=>'API\TwitterController@addTweet','middleware' => 'twitter-wrapper']);
 
  /** Face book specific routes **/
     Route::post('/facebook/search-feeds', ['uses'=>'API\FacebookController@searchUserFeeds']);  
+    Route::post('/facebook/add-post', ['uses'=>'API\FacebookController@addPost']);  
     Route::get('/callback/facebook', ['uses'=>'API\FacebookController@callBack']);  
     
 });
