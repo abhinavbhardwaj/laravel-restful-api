@@ -30,3 +30,8 @@ php artisan passport:install
 composer require thujohn/twitter
 
 composer require sammyk/laravel-facebook-sdk
+
+
+------------------------To create custom helper ---------
+https://code.tutsplus.com/tutorials/how-to-create-a-laravel-helper--cms-28537
+php artisan make:provider HelperServiceProvider 

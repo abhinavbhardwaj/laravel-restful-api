@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth:api'], function(){
  /** Face book specific routes **/
     Route::post('/facebook/search-feeds', ['uses'=>'API\FacebookController@searchUserFeeds']);  
     Route::post('/facebook/add-post', ['uses'=>'API\FacebookController@addPost']);  
+    Route::post('/facebook/delete-post', ['uses'=>'API\FacebookController@deletePost']);  
     Route::get('/callback/facebook', ['uses'=>'API\FacebookController@callBack']);  
     
 });

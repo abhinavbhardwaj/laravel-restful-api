@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Facebook;
 use File;
 use Validator;
+use Helper;
 
 class FacebookController extends Controller { 
 
@@ -20,21 +21,21 @@ class FacebookController extends Controller {
         $input = $request->all();
         $matchedSearch = array();
         $accessToken = $request->header('authToken');
-        
+
         $receiveFormDate = $input['from_date'];
         $receiveToDate = $input['to_date'];
         
         $fromDate = strtotime($receiveFormDate.' 00:00');
         $toDate = strtotime($receiveToDate.' 23:59');
         
-        $searchText = trim($input['search_query']); 
+        $searchText = trim($input['search_query']);
         try {
             $response = Facebook::get('/me/feed?limit=20000&since=' . $fromDate . '&until=' . $toDate, $accessToken); //current user all post
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
             return response()->json(['error' => 'some error occur'], \Config::get('constants.status.unauthorized'));
         }
 
-        $post = $response->getDecodedBody(); 
+        $post = $response->getDecodedBody();
         if(count($post['data'])>0){
             $matchedSearch = $this->getMatchedSearch($post['data'], $searchText);
         }
@@ -51,10 +52,10 @@ class FacebookController extends Controller {
 
     /**
      * method to filter search text from a given array value
-     * @param array $feedData all post array 
-     * @param string $searchText 
+     * @param array $feedData all post array
+     * @param string $searchText
      */
-    private function getMatchedSearch($feedData, $searchText) {     
+    private function getMatchedSearch($feedData, $searchText) {
         $searchResult = array();
         $searchArray = explode(",", $searchText);  
         foreach ($feedData as $data) {    
@@ -68,7 +69,10 @@ class FacebookController extends Controller {
                     
                     foreach ($searchArray as $search) {  
                         
-                        if (strpos(strtolower($message), trim(strtolower($search))) !== FALSE) { 
+                        if (strpos(strtolower($message), trim(strtolower($search))) !== FALSE) {
+                            $data['message'] =  (!empty($data['message']))  ? $data['message'] : $data['story'];
+                            unset($data['story']);
+
                             $searchResult[] = $data; 
                         }
                     }
@@ -100,8 +104,7 @@ class FacebookController extends Controller {
      * API to create a callback for the call from client
      * @param Request $request
      */
-    public function addPost(Request $request) {
-         
+    public function addPost(Request $request) {         
          $input = $request->all();
          $accessToken = $request->header('authToken');
          
@@ -117,8 +120,13 @@ class FacebookController extends Controller {
          if(!empty($input['description'])){
             $post['description'] = $input['description'];
          }
-         if(!empty($input['picture'])){
-            $post['picture'] = $input['picture'];
+         if(!empty($input['picture'])){ 
+             $imagePath = Helper::uploadImage($input['picture']);
+             if(!empty($imagePath)){
+                 $imageUrl = url("/$imagePath"); 
+                 $post['picture'] = $imageUrl;
+             }
+              
          }
           
         try {
@@ -129,4 +137,28 @@ class FacebookController extends Controller {
         }
     }
     
+      /**
+     * API to create a callback for the call from client
+     * @param Request $request
+     */
+    public function deletePost(Request $request) {
+         $input = $request->all();
+         $accessToken = $request->header('authToken');
+         $postIds = explode(',', $input['postIds']);
+
+         if(count($postIds) == 0){
+              return response()->json(['error' => 'No post found'], \Config::get('constants.status.unauthorized'));
+         }
+
+         foreach($postIds as $postId):
+            try {
+                $response = Facebook::delete(trim($postId), array () , $accessToken);
+                $return['success'][$postId] = 'Deleted successfully';
+            } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+                 $return['error'][$postId] = $e->getMessage();
+            }
+        endforeach;
+        return response()->json(['data' => $return], \Config::get('constants.status.success'));
+    }
+
 }

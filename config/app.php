@@ -165,6 +165,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
         SammyK\LaravelFacebookSdk\LaravelFacebookSdkServiceProvider::class,
+        App\Providers\HelperServiceProvider::class,
         'Thujohn\Twitter\TwitterServiceProvider',
         
 
@@ -230,6 +231,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Facebook' => SammyK\LaravelFacebookSdk\FacebookFacade::class,
+        'Helper' => App\Helpers\Helpers::class,
         'Twitter' => 'Thujohn\Twitter\Facades\Twitter',
 
     ],
