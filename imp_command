@@ -16,7 +16,7 @@ eg.  php artisan make:model Models/Account
 
 -------------------------To create Controller file -------------
 php artisan make:model folder/controllerName
-eg.  php artisan make:controller API/TwitterController 
+eg.  php artisan make:controller API/SchedulePostController 
 
 
 ----------------------To run all migration files ---------------
@@ -35,3 +35,14 @@ composer require sammyk/laravel-facebook-sdk
 ------------------------To create custom helper ---------
 https://code.tutsplus.com/tutorials/how-to-create-a-laravel-helper--cms-28537
 php artisan make:provider HelperServiceProvider 
+
+
+--------------------To disply last executed query --------------
+ In Laravel 5 you should enable do 
+    DB::enableQueryLog();  
+Then after placing your final statement:
+    DB::table('users')->where('name', '=', 'Aknavi')->get();  
+just run:
+    dd(DB::getQueryLog());
+-------------------------------------------
+

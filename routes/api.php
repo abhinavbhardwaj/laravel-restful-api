@@ -21,17 +21,22 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get-details', 'API\UserController@details');
     Route::get('get-user-account', 'API\AccountController@index');
+    Route::post('schedule-post', 'API\SchedulePostController@schedulePost');
+    Route::get('list-schedule-post', 'API\SchedulePostController@listSchedulePost');
+    Route::get('/schedule/change-status', 'API\SchedulePostController@changeStatus');
 	
  /** twitter specific routes **/
-    Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
+	Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
     Route::post('get-twetter-feed', ['uses'=>'API\TwitterController@searchTweets','middleware' => 'twitter-wrapper']);
     Route::post('delete-tweet', ['uses'=>'API\TwitterController@deleteTweet','middleware' => 'twitter-wrapper']);
-    Route::post('add-tweet', ['uses'=>'API\TwitterController@addTweet','middleware' => 'twitter-wrapper']);
+	Route::post('add-tweet', ['uses'=>'API\TwitterController@addTweet','middleware' => 'twitter-wrapper']);
+ Route::post('bulk-add-tweet', ['uses'=>'API\TwitterController@bulkAddTweet','middleware' => 'twitter-wrapper']);
 
- /** Face book specific routes **/
-    Route::post('/facebook/search-feeds', ['uses'=>'API\FacebookController@searchUserFeeds']);  
-    Route::post('/facebook/add-post', ['uses'=>'API\FacebookController@addPost']);  
-    Route::post('/facebook/delete-post', ['uses'=>'API\FacebookController@deletePost']);  
-    Route::get('/callback/facebook', ['uses'=>'API\FacebookController@callBack']);  
-    
+ /** Facebook specific routes **/
+    Route::post('/facebook/search-feeds', ['uses'=>'API\FacebookController@searchUserFeeds']);
+	Route::get('/callback/facebook', ['uses'=>'API\FacebookController@callBack']);
+	Route::post('/facebook/delete-post', ['uses'=>'API\FacebookController@deletePost']);
+	Route::post('/facebook/add-post', ['uses'=>'API\FacebookController@addPost']);
+	Route::post('/facebook/add-story', ['uses'=>'API\FacebookController@addStory']);
+
 });
