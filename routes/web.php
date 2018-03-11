@@ -15,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('schedule-post', 'API\SchedulePostController@index');
 Route::get('twitterUserTimeLine', 'API\TwitterController@twitterUserTimeLine');
 
 Route::post('tweet', ['as'=>'post.tweet','uses'=>'API\TwitterController@tweet']);

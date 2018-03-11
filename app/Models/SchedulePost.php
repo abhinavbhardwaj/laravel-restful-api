@@ -37,16 +37,25 @@ class SchedulePost extends Model
         return $resultArray;
     }
     
-      /**
-     * method to get all post id by user id 
+    /**
+     * method to update schedule post by post id 
      * @author Abhinav Bhardwaj <abhinav.bhardwaj@engineer.com>
      */
-    public function updatePostByID( $userId) { 
-        $sPost = DB::table($this->table)
-                     ->select('*')
-                     ->where('user_id', '=', $userId) 
-                     ->get();  
-        $resultArray = $sPost->toArray();  
-        return $resultArray;
+    public function updatePostByID( $sPostId,$userId, $what) {  
+        $sPostUpdate = 0;
+        if(!empty($what) && (int)$sPostId > 0){
+            $sPostUpdate = DB::table($this->table)->where('id', $sPostId)->where('user_id', '=', $userId) 
+                ->update($what);               
+        }
+        return $sPostUpdate;
+    }
+    
+    /**
+     * method to update schedule post by post id 
+     * @author Abhinav Bhardwaj <abhinav.bhardwaj@engineer.com>
+     */
+    public function deletePostByID($sPostId,$userId) {  
+         $sPostDelete =    DB::table($this->table)->where('id', '=', $sPostId)->where('user_id', '=', $userId)->delete(); 
+        return $sPostDelete;
     }
 }

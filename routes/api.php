@@ -23,7 +23,7 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get-user-account', 'API\AccountController@index');
     Route::post('schedule-post', 'API\SchedulePostController@schedulePost');
     Route::get('list-schedule-post', 'API\SchedulePostController@listSchedulePost');
-    Route::get('/schedule/change-status', 'API\SchedulePostController@changeStatus');
+    Route::post('/schedule/change-status', 'API\SchedulePostController@changeStatus');
 	
  /** twitter specific routes **/
 	Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
