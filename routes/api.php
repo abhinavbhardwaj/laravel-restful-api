@@ -24,12 +24,14 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::post('schedule-post', 'API\SchedulePostController@schedulePost');
     Route::get('list-schedule-post', 'API\SchedulePostController@listSchedulePost');
     Route::post('/schedule/change-status', 'API\SchedulePostController@changeStatus');
+    Route::post('/schedule/update-post', 'API\SchedulePostController@updatePost');
 	
  /** twitter specific routes **/
 	Route::post('twitter-user-timeline', ['uses'=>'API\TwitterController@twitterUserTimeLine','middleware' => 'twitter-wrapper']);
     Route::post('get-twetter-feed', ['uses'=>'API\TwitterController@searchTweets','middleware' => 'twitter-wrapper']);
     Route::post('delete-tweet', ['uses'=>'API\TwitterController@deleteTweet','middleware' => 'twitter-wrapper']);
 	Route::post('add-tweet', ['uses'=>'API\TwitterController@addTweet','middleware' => 'twitter-wrapper']);
+	Route::post('re-tweet', ['uses'=>'API\TwitterController@reTweet','middleware' => 'twitter-wrapper']);
  Route::post('bulk-add-tweet', ['uses'=>'API\TwitterController@bulkAddTweet','middleware' => 'twitter-wrapper']);
 
  /** Facebook specific routes **/

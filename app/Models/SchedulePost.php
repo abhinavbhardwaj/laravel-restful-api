@@ -20,20 +20,26 @@ class SchedulePost extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'user_id', 'account_type','auth_token','auth_secret','post_data','schedule_date',
+        'id', 'user_id','authorization', 'account_type','auth_token','auth_secret','post_data','schedule_date',
     ];
     
     /**
      * method to get all post id by user id 
      * @author Abhinav Bhardwaj <abhinav.bhardwaj@engineer.com>
      */
-    public function getPostByUser( $userId) { 
-        $sPost = DB::table($this->table)
-                     ->select('*')
-                     ->where('user_id', '=', $userId) 
-                     ->where('status', '!=', 3) 
-                     ->get();  
-        $resultArray = $sPost->toArray(); 
+    public function getPostByUser( $userId = 0, $time = null, $status = array(1,2,3)) {
+        //DB::enableQueryLog();
+        $query = DB::table($this->table)->select('*')->whereIn('status', $status)->orderBy('id', 'DESC');
+        if((int)$userId > 0){
+            $query->where('user_id', '=', $userId);
+        }
+        if($time){
+            $query->where('schedule_date', '<=', now());
+        }
+
+        $results = $query->get();
+        // dd(DB::getQueryLog()); die;
+        $resultArray  = $results->toArray();
         return $resultArray;
     }
     

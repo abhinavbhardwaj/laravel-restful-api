@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Twitter;
 use File;
 use Validator;
-use Helper; 
+use Helper;
 
 class TwitterController extends Controller {
     public $allTweets = null;
@@ -19,24 +19,24 @@ class TwitterController extends Controller {
     public function twitterUserTimeLine(Request $request) {
         $input = $request->all();
         $screenName = $input['screen_name'];
-        $fromDate =  strtotime($input['from_date']);
-        $toDate = strtotime($input['to_date']);
+        $fromDate =  strtotime($input['from_date']." 00:00:00");
+        $toDate = strtotime($input['to_date']." 23:59:59");
         $searchText = trim($input['search_query']);
         $prevPost = isset($input['prev_ids']) ? $input['prev_ids']: null;
         $count = 200;
         //we need all tweets from this particualr date range so lets start our loop
-        $tweetsData[] = $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText, $prevPost); 
+        $tweetsData[] = $this->_createTweetsData($screenName, $count, $fromDate, $toDate, $searchText, $prevPost);
         if(isset($this->allTweets)){
             $return['totalTweet'] = (isset($this->allTweets['all'])) ? count($this->allTweets['all']) : 0;
             $return['matchedTweet'] = (isset($this->allTweets['matchedSearch'])) ? count($this->allTweets['matchedSearch']) : 0;
-            $return['matchedTweetsData'] = (isset($this->allTweets['matchedSearch'])) ? $this->allTweets['matchedSearch'] : 0; 
+            $return['matchedTweetsData'] = (isset($this->allTweets['matchedSearch'])) ? $this->allTweets['matchedSearch'] : 0;
             //$return['totalTweetData'] = (isset($this->allTweets['all'])) ? $this->allTweets['all'] : 0;
 
             $return['from_date'] = date('d-m-Y', $fromDate);
             $return['to_date'] = date('d-m-Y',$toDate);
             $return['search_query'] = $searchText;
 
-            return response()->json(['success' => $return], \Config::get('constants.status.success')); 
+            return response()->json(['success' => $return], \Config::get('constants.status.success'));
         } 
         }
 
@@ -54,7 +54,7 @@ class TwitterController extends Controller {
         $finalData = null;
 
         $tweets['matchedSearch'] = isset($prevMatchedSearch) ? $prevMatchedSearch : array();
-
+        
         if (isset($max_id) && (int) $max_id > 0) {
             $tweetData = Twitter::getUserTimeline(['screen_name' => $screenName, 'count' => $count, 'max_id' => $max_id]);
         } else {
@@ -63,7 +63,7 @@ class TwitterController extends Controller {
         if (!empty($searchText)) {
             $searchArray = explode(",", $searchText);
         }
-
+         
         if($prevPost){
             $tweetData = $this->getNewPost($tweetData, $prevPost);
         }  
@@ -214,6 +214,22 @@ class TwitterController extends Controller {
         $input = $request->all();
         $tweet = $input['tweet']; 
         $twitterResponse = Twitter::postTweet(array('status' => "$tweet", 'format' => 'json')); 
+        return response()->json(['success' => $twitterResponse], \Config::get('constants.status.success'));
+    }
+    
+   /**
+     * Re-tweet on a tweeter account.
+     *
+     * @return void
+     */
+    public function reTweet(Request $request) { 
+        $this->validate($request, [
+            'tweetId' => 'required'
+        ]);
+
+        $input = $request->all();
+        $tweetId = $input['tweetId']; 
+        $twitterResponse = Twitter::postRt($tweetId); 
         return response()->json(['success' => $twitterResponse], \Config::get('constants.status.success'));
     }
     

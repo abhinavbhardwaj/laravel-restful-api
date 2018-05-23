@@ -28,12 +28,18 @@ class FacebookPost extends Model
      * method to get all post id by user id 
      * @author Abhinav Bhardwaj <abhinav.bhardwaj@engineer.com>
      */
-    public function getPostByUser( $userId) { 
+    public function getPostByUser( $userId) {
+        $result = array();
+         //DB::enableQueryLog();
         $fbPost = DB::table($this->table)
-                     ->select(DB::raw('group_concat(distinct fb_id) as fb_ids'))
-                     ->where('user_id', '=', $userId) 
-                     ->get();  
-        $resultArray = $fbPost->toArray();  
-        return $resultArray[0];
+                     ->select(DB::raw('distinct fb_id'))
+                     ->where('user_id', '=', $userId)
+                     ->get();
+                     // dd(DB::getQueryLog()); die;
+        $resultArray = $fbPost->toArray();
+        foreach($resultArray as $key => $value){
+            $result[]  = trim($value->fb_id);
+        }
+        return $result;
     }
 }

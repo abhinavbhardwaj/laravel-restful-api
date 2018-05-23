@@ -39,7 +39,7 @@ class FacebookController extends Controller {
         } catch (\Facebook\Exceptions\FacebookSDKException $e) {
             return response()->json(['error' => $e->getMessage()], \Config::get('constants.status.unauthorized'));
         }
-
+        
         $post = $response->getDecodedBody();
         if($prevPost){
             $post = $this->getNewPost($post, $prevPost);
@@ -85,14 +85,14 @@ class FacebookController extends Controller {
      * @return array $postData with updated status
      */
     private function setUserPost(){ 
-        $fb_ids = array();
+        $fbPost = array();
         $fbDb = new FacebookPost();
         $userId = Auth::user()->id; 
         $fbPost = $fbDb->getPostByUser( $userId);
-        if((!empty($fbPost->fb_ids))){
-            $fb_ids = explode(',', $fbPost->fb_ids);
-        }
-        return $fb_ids;
+        //if((!empty($fbPost->fb_ids))){
+        //    $fb_ids = explode(',', $fbPost->fb_ids);
+        //}
+        return $fbPost;
     }
 
     /**
@@ -100,7 +100,7 @@ class FacebookController extends Controller {
      * @param array $feedData all post array
      * @param string $searchText
      */
-    private function getMatchedSearch($feedData, $searchText) { 
+    private function getMatchedSearch($feedData, $searchText) {
         $searchResult = array();
         $searchArray = explode(",", $searchText);
         foreach ($feedData as $data) {
@@ -118,7 +118,7 @@ class FacebookController extends Controller {
                             $data['message'] =  (!empty($data['message']))  ? $data['message'] : $data['story'];
                             unset($data['story']);
                                 
-                            $data['addedByapp'] = (in_array($data['id'], $this->_userAddedPost)) ? 1 : 0; 
+                            $data['addedByapp'] = (in_array($data['id'], $this->_userAddedPost)) ? 1 : 0;
                            
                             $searchResult[] = $data; 
                         }

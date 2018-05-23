@@ -30,6 +30,12 @@ php artisan passport:install
 composer require thujohn/twitter
 
 composer require sammyk/laravel-facebook-sdk
+-------------------------to install guzzle -----------
+composer require guzzle/guzzle ~3.0
+        or 
+composer require guzzlehttp/guzzle
+if any issue occur :  sudo composer config -g secure-http false
+composer clear-cache
 
 
 ------------------------To create custom helper ---------
@@ -37,7 +43,7 @@ https://code.tutsplus.com/tutorials/how-to-create-a-laravel-helper--cms-28537
 php artisan make:provider HelperServiceProvider 
 
 
---------------------To disply last executed query --------------
+--------------------To display last executed query --------------
  In Laravel 5 you should enable do 
     DB::enableQueryLog();  
 Then after placing your final statement:
@@ -45,4 +51,16 @@ Then after placing your final statement:
 just run:
     dd(DB::getQueryLog());
 -------------------------------------------
+--------------------To generate custom command (cron job or console)---------------------
+ 
+php artisan make:command CustomCommand --command=schedulePost:run
+php /home/alphahyh/public_html/api/artisan schedulePost:run
+* * * * * php /home/alphahyh/public_html/api/artisan schedule:run >> /dev/null 2>&1
+-----------------------------------------------------------------------------------------
 
+
+--------------To do on live ---------
+
+php artisan make:migration add_authorization_to_schedulePostTable
+php artisan migrate
+composer require guzzlehttp/guzzle
